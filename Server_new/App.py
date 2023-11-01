@@ -8,6 +8,7 @@ import PIL.Image
 from urllib.request import urlopen
 import movieposters as mp
 from PyMovieDb import IMDB
+import json
 imdb = IMDB()
 
 with open(r'Server_new\Data\movie_data.json', 'r+', encoding='utf-8') as f:
@@ -60,18 +61,19 @@ def parse(list):
 def get_movie_info(imdb_link):
     movie_id = parse_link(imdb_link)
     res = imdb.get_by_id(movie_id)
-    write_to_file(str(res))
+    #write_to_file(str(res))
     movie_director = ""
     movie_cast = ""
     movie_story = ""
     movie_rating = ""
-    try:
-        movie_director = res['director'][0]['name']
-        movie_cast = parse(res['cast'])
-        movie_story = res['review']['reviewBody']
-        movie_rating = res['rating']['ratingValue']
-    except:
-        pass
+    
+    movie_data = json.loads(res)
+    movie_director = movie_data['director'][0]['name']
+    movie_cast = [actor['name'] for actor in movie_data['actor']]
+    movie_story = movie_data['review']['reviewBody']
+    movie_rating = movie_data['rating']['ratingValue']
+    
+    write_to_file(str(movie_director) + str(movie_cast) + str(movie_story) + str(movie_rating))
     return movie_director, movie_cast, movie_story, movie_rating
 
 
@@ -98,7 +100,7 @@ st.set_page_config(
 
 def run():
     img1 = Image.open('Server_new\meta\logo.jpg')
-    img1 = img1.resize((250, 250), )
+    img1 = img1.resize((500, 250), )
     st.image(img1, use_column_width=False)
     st.title("Movie Recommender System")
     st.markdown('''<h4 style='text-align: left; color: #d73b5c;'>* Data is based "IMDB 5000 Movie Dataset"</h4>''',
