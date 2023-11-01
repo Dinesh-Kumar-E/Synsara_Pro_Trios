@@ -6,25 +6,26 @@ from bs4 import BeautifulSoup
 import requests, io
 import PIL.Image
 from urllib.request import urlopen
+import movieposters as mp
 
-with open('./Data/movie_data.json', 'r+', encoding='utf-8') as f:
+with open(r'Server_new\Data\movie_data.json', 'r+', encoding='utf-8') as f:
     data = json.load(f)
-with open('./Data/movie_titles.json', 'r+', encoding='utf-8') as f:
+with open(r'Server_new\Data\movie_titles.json', 'r+', encoding='utf-8') as f:
     movie_titles = json.load(f)
 hdr = {'User-Agent': 'Mozilla/5.0'}
 
 def write_to_file(data):
-    with open('movie_data.json', 'w') as f:
-        json.dump(data, f)
+    with open(r'Server_new\logs\movie_data.txt','a') as f:
+        f.write(data+'\n')
 
 def movie_poster_fetcher(imdb_link):
-    print(imdb_link)
+    write_to_file(imdb_link)
     ## Display Movie Poster
-    url_data = requests.get(imdb_link, headers=hdr).text
-    s_data = BeautifulSoup(url_data, 'html.parser')
-    imdb_dp = s_data.find("meta", property="og:image1")
-    movie_poster_link = imdb_dp.attrs['content']
-    u = urlopen(movie_poster_link)
+    #http://www.imdb.com/title/tt0437745/?ref_=fn_tt_tt_1
+    id_start = imdb_link.find('title/')+6
+    id_end = imdb_link.find('/?')
+    link = mp.get_poster(id=imdb_link[id_start:id_end])
+    u = urlopen(link)
     raw_data = u.read()
     image = PIL.Image.open(io.BytesIO(raw_data))
     image = image.resize((158, 301), )
@@ -67,7 +68,7 @@ st.set_page_config(
 
 
 def run():
-    img1 = Image.open('./meta/logo.jpg')
+    img1 = Image.open('Server_new\meta\logo.jpg')
     img1 = img1.resize((250, 250), )
     st.image(img1, use_column_width=False)
     st.title("Movie Recommender System")
