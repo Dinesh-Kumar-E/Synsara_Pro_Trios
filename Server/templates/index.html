@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Recommender</title>
+</head>
+<body>
+    <h1>Movie Recommender</h1>
+    <form method="POST" action="/recommendations">
+        <label for="genres">Genres:</label>
+        <input type="checkbox" name="genre" value="Action"> Action
+        <!-- Add more genre checkboxes here -->
+
+        <label for="year">Year of Release:</label>
+        <input type="number" name="year" min="1900" max="2023">
+
+        <label for="language">Language:</label>
+        <input type="text" name="language">
+
+        <label for="rating">Rating:</label>
+        <input type="number" name="rating" min="0" max="10">
+        <br>
+
+        <input type="submit" value="Get Recommendations">
+    </form>
+</body>
+</html>
