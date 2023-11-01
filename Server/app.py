@@ -11,14 +11,14 @@ from PyMovieDb import IMDB
 import json
 imdb = IMDB()
 
-with open(r'Server_new\Data\movie_data.json', 'r+', encoding='utf-8') as f:
+with open(r'Server\Data\movie_data.json', 'r+', encoding='utf-8') as f:
     data = json.load(f)
-with open(r'Server_new\Data\movie_titles.json', 'r+', encoding='utf-8') as f:
+with open(r'Server\Data\movie_titles.json', 'r+', encoding='utf-8') as f:
     movie_titles = json.load(f)
 hdr = {'User-Agent': 'Mozilla/5.0'}
 
 def write_to_file(data):
-    with open(r'Server_new\logs\movie_data.txt','a') as f:
+    with open(r'Server\logs\movie_data.txt','a') as f:
         f.write(data+'\n')
 
 def parse_link(imdb_link):
@@ -38,20 +38,6 @@ def movie_poster_fetcher(imdb_link):
     image = image.resize((158, 301), )
     st.image(image, use_column_width=False)
 
-
-def get_movie_info_old(imdb_link):
-    url_data = requests.get(imdb_link, headers=hdr).text
-    s_data = BeautifulSoup(url_data, 'html.parser')
-    imdb_content = s_data.find("meta", property="og:description")
-    movie_descr = imdb_content.attrs['content']
-    movie_descr = str(movie_descr).split('.')
-    movie_director = movie_descr[0]
-    movie_cast = str(movie_descr[1]).replace('With', 'Cast: ').strip()
-    movie_story = 'Story: ' + str(movie_descr[2]).strip() + '.'
-    rating = s_data.find("span", class_="sc-bde20123-1 iZlgcd").text
-    movie_rating = 'Total Rating count: ' + str(rating)
-    return movie_director, movie_cast, movie_story, movie_rating
-
 def parse(list):
     names = []
     for i in list:
@@ -70,12 +56,12 @@ def get_movie_info(imdb_link):
     movie_data = json.loads(res)
     try:
         movie_director = movie_data['director'][0]['name']
-        movie_cast = [actor['name'] for actor in movie_data['actor']]
+        movie_cast = str([actor['name'] for actor in movie_data['actor']]).replace('[', '').replace(']', '').replace("'", '')
         movie_story = movie_data['review']['reviewBody']
         movie_rating = movie_data['rating']['ratingValue']
     except:
         pass
-    write_to_file(str(movie_director) + str(movie_cast) + str(movie_story) + str(movie_rating))
+    # write_to_file(str(movie_director) + movie_cast + str(movie_story) + str(movie_rating))
     return movie_director, movie_cast, movie_story, ""
 
 
@@ -101,11 +87,11 @@ st.set_page_config(
 
 
 def run():
-    img1 = Image.open('Server_new\meta\logo.jpg')
-    img1 = img1.resize((500, 250), )
+    img1 = Image.open('Server\meta\logo.jpg')
+    img1 = img1.resize((700, 250), )
     st.image(img1, use_column_width=False)
     st.title("Movie Recommender System")
-    st.markdown('''<h4 style='text-align: left; color: #d73b5c;'>* Data is based "IMDB 5000 Movie Dataset"</h4>''',
+    st.markdown('''<h4 style='text-align: left; color: #d73b5c;'> Data is based IMDB Movie Dataset</h4>''',
                 unsafe_allow_html=True)
     genres = ['Action', 'Adventure', 'Animation', 'Biography', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family',
               'Fantasy', 'Film-Noir', 'Game-Show', 'History', 'Horror', 'Music', 'Musical', 'Mystery', 'News',
@@ -120,7 +106,7 @@ def run():
                                     ['--Select--'] + movies)
         dec = st.radio("Want to Fetch Movie Poster?", ('Yes', 'No'))
         st.markdown(
-            '''<h4 style='text-align: left; color: #d73b5c;'>* Fetching a Movie Posters will take a time."</h4>''',
+            '''<h4 style='text-align: left; color: #cc7533;'>Fetching a Movie Posters will take a time</h4>''',
             unsafe_allow_html=True)
         if dec == 'No':
             if select_movie == '--Select--':
