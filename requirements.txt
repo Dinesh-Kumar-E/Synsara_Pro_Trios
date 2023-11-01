@@ -1,6 +1,4 @@
 imdb-lib==0.3
-googlesearch-python==1.2.3
-google_images_download==2.8.0
 bing-image-downloader==1.1.2
 streamlit
 numpy
