@@ -68,11 +68,13 @@ def get_movie_info(imdb_link):
     movie_rating = ""
     
     movie_data = json.loads(res)
-    movie_director = movie_data['director'][0]['name']
-    movie_cast = [actor['name'] for actor in movie_data['actor']]
-    movie_story = movie_data['review']['reviewBody']
-    movie_rating = movie_data['rating']['ratingValue']
-    
+    try:
+        movie_director = movie_data['director'][0]['name']
+        movie_cast = [actor['name'] for actor in movie_data['actor']]
+        movie_story = movie_data['review']['reviewBody']
+        movie_rating = movie_data['rating']['ratingValue']
+    except:
+        pass
     write_to_file(str(movie_director) + str(movie_cast) + str(movie_story) + str(movie_rating))
     return movie_director, movie_cast, movie_story, movie_rating
 
