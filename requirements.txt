@@ -9,3 +9,4 @@ pandas
 requests
 beautifulsoup4
 urllib3
+PyMovieDb-0.0.8

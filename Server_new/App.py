@@ -7,6 +7,8 @@ import requests, io
 import PIL.Image
 from urllib.request import urlopen
 import movieposters as mp
+from PyMovieDb import IMDB
+imdb = IMDB()
 
 with open(r'Server_new\Data\movie_data.json', 'r+', encoding='utf-8') as f:
     data = json.load(f)
@@ -18,13 +20,17 @@ def write_to_file(data):
     with open(r'Server_new\logs\movie_data.txt','a') as f:
         f.write(data+'\n')
 
+def parse_link(imdb_link):
+    id_start = imdb_link.find('title/')+6
+    id_end = imdb_link.find('/?')
+    return imdb_link[id_start:id_end]
+
 def movie_poster_fetcher(imdb_link):
     write_to_file(imdb_link)
     ## Display Movie Poster
     #http://www.imdb.com/title/tt0437745/?ref_=fn_tt_tt_1
-    id_start = imdb_link.find('title/')+6
-    id_end = imdb_link.find('/?')
-    link = mp.get_poster(id=imdb_link[id_start:id_end])
+    
+    link = mp.get_poster(id=parse_link(imdb_link))
     u = urlopen(link)
     raw_data = u.read()
     image = PIL.Image.open(io.BytesIO(raw_data))
@@ -32,7 +38,7 @@ def movie_poster_fetcher(imdb_link):
     st.image(image, use_column_width=False)
 
 
-def get_movie_info(imdb_link):
+def get_movie_info_old(imdb_link):
     url_data = requests.get(imdb_link, headers=hdr).text
     s_data = BeautifulSoup(url_data, 'html.parser')
     imdb_content = s_data.find("meta", property="og:description")
@@ -43,6 +49,29 @@ def get_movie_info(imdb_link):
     movie_story = 'Story: ' + str(movie_descr[2]).strip() + '.'
     rating = s_data.find("span", class_="sc-bde20123-1 iZlgcd").text
     movie_rating = 'Total Rating count: ' + str(rating)
+    return movie_director, movie_cast, movie_story, movie_rating
+
+def parse(list):
+    names = []
+    for i in list:
+        names.append(i['name'])
+    return str(names).replace('[', '').replace(']', '').replace("'", '')
+
+def get_movie_info(imdb_link):
+    movie_id = parse_link(imdb_link)
+    res = imdb.get_by_id(movie_id)
+    write_to_file(str(res))
+    movie_director = ""
+    movie_cast = ""
+    movie_story = ""
+    movie_rating = ""
+    try:
+        movie_director = res['director'][0]['name']
+        movie_cast = parse(res['cast'])
+        movie_story = res['review']['reviewBody']
+        movie_rating = res['rating']['ratingValue']
+    except:
+        pass
     return movie_director, movie_cast, movie_story, movie_rating
 
 
